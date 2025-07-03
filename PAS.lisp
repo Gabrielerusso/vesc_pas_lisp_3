@@ -14,6 +14,7 @@
 (define app_stat 1)
 (define a_set_curr 0)
 (define speed_l 0)
+(define speed_prev 0)
 
 (gpio-configure 'pin-ppm 'pin-mode-in)
 
@@ -58,22 +59,25 @@
     (setvar 'adc0_dec (get-adc-decoded 0)) ;throttle
 
     (if (> pas_c 2)
-        (if (and (< adc0_dec 0.05) (< adc1_dec 0.05)){
-            (if (< speed_l 7)
-                {(conf-set 'max-speed (/ 25 3.6))
-                (setvar 'speed_l 25)})
+        {
+        (if (< speed_l 7)
+            {(conf-set 'max-speed speed_prev)
+            (setvar 'speed_l (* speed_prev 3.6))})
+        (if (and (< adc0_dec 0.2) (< adc1_dec 0.3)){
             (if (< a_set_curr 1.0)
                 (setvar 'a_set_curr (+ a_set_curr 0.025))) ;throttle filter constant
             (app_output 0)
             (set-current-rel a_set_curr)}
             (app_output 1))
+        }
         {
             (if (> speed_l 6)
-                {(conf-set 'max-speed (/ 6 3.6))
+                {(setvar 'speed_prev (conf-get 'max-speed)) ;store previous speed
+                (conf-set 'max-speed (/ 6 3.6))
                 (setvar 'speed_l 6)})
             (if (>= a_set_curr 0.1)
                 (setvar 'a_set_curr (- a_set_curr 0.05)))
             (app_output 1)
-        }
+        })
     (sleep 0.1)
 })
