@@ -57,13 +57,13 @@
     (setvar 'adc0_dec (get-adc-decoded 0)) ;throttle
 
     (if (> pas_c 2)
-        (if (and (< adc0_dec 0.05) (< adc1_dec 0.05)){
+        (if (and (< adc0_dec 0.2) (< adc1_dec 0.3)){
             (if (< a_set_curr 1.0)
                 (setvar 'a_set_curr (+ a_set_curr 0.025))) ;throttle filter constant
             (app_output 0)
             (set-current-rel a_set_curr)}
             (app_output 1))
-        (if (and (< adc1_dec 0.1) (> speed 5)){
+        (if (and (< adc1_dec 0.3) (> speed 5)){
             (if (>= a_set_curr 0.1)
                 (setvar 'a_set_curr (- a_set_curr 0.05)))
             (app_output 0)
