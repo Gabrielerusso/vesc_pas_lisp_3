@@ -14,7 +14,6 @@
 (define app_stat 1)
 (define a_set_curr 0)
 (define speed_l 25)
-(define speed_prev 0)
 
 (gpio-configure 'pin-ppm 'pin-mode-in)
 
@@ -56,16 +55,16 @@
 (loopwhile t {
     (setvar 'speed (* (get-speed) 3.6))
     (setvar 'adc1_dec 0.0) ;brake replace 0.0 with (get-adc-decoded 1) if brake is used
-    (setvar 'adc0_dec (get-adc-decoded 0)) ;throttle
+    (setvar 'adc0_dec (get-adc-decoded 0)) ;throttle replace 0.0 with (get-adc-decoded 0) to enable
 
     (if (> pas_c 2)
         {
         (if (< speed_l 7)
             {(conf-set 'max-speed (/ 25 3.6))
             (setvar 'speed_l 25)})
-        (if (< adc1_dec 0.3){
+        (if (and (< adc0_dec 0.2) (< adc1_dec 0.3)){
             (if (< a_set_curr 1.0)
-                (setvar 'a_set_curr (+ a_set_curr 0.025))) ;throttle filter constant
+                (setvar 'a_set_curr (+ a_set_curr 0.025)))
             (app_output 0)
             (set-current-rel a_set_curr)}
             (app_output 1))
